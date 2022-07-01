@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class Visualizer : MonoBehaviour
 {
-    public GameObject m_ChannelEntities;
-    public GameObject m_GroupEntities;
+    [SerializeField] private GameObject m_ChannelEntities;
+    [SerializeField] private GameObject m_GroupEntities;
 
     public GameObject m_EdgeParent;
     public DataReader DataReader;

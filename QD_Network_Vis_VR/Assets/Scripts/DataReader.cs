@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -92,7 +93,7 @@ public class DataReader : MonoBehaviour
 }
 
 
-
+[Serializable]
 public struct Node
 {
     public string id;
@@ -114,7 +115,7 @@ public struct Node
 
     public void ComputeDegree()
     {
-
+        
     }
 
     public override string ToString()
@@ -123,6 +124,7 @@ public struct Node
     }
 }
 
+[Serializable]
 public struct Edge
 {
     public string sourceID;
