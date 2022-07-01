@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -8,24 +7,29 @@ using System.Linq;
 public class DataReader : MonoBehaviour
 {
 
-    public HashSet<Node> m_NodesTemp = new HashSet<Node>();
-    public List<Node> m_Nodes = new List<Node>();
+    [SerializeField] private HashSet<Node> nodesTemp = new HashSet<Node>();
+    public List<Node> Nodes { get; set; }
+    public List<Edge> Edges { get; set; }
 
-    //[0] in-m_Degree, [1]  out-m_Degree
-    public Dictionary<string, int> m_OutDegreeCounts = new Dictionary<string, int>();
-    public Dictionary<string, int> m_InDegreeCounts = new Dictionary<string, int>();
-    public List<Edge> m_Edges = new List<Edge>();
-    [SerializeField] private string m_Filename = "prelim_network_data_QD.csv";
-    // Start is called before the first frame update
+    [SerializeField] private string fileNameEdgeListVr3DCoords = "";
+    [SerializeField] private string fileNameEntityActivityTable = "";
+    private Dictionary<string, int> outDegreeCounts = new Dictionary<string, int>();
+    private Dictionary<string, int> inDegreeCounts = new Dictionary<string, int>();
+    [SerializeField] private Dictionary<string, string> nameToEntityTypeMapping = new Dictionary<string, string>();
+
     void Awake()
     {
+        Nodes = new List<Node>();
+        Edges = new List<Edge>();
         ReadCSV();
-        ConvertToList();
+        ConverttoList();
+        GetAndAssignEntityType();
         AddDegreesToNodes();
     }
+
     void ReadCSV()
     {
-        using (var reader = new StreamReader("Assets/Data/" + m_Filename))
+        using (var reader = new StreamReader("Assets/Data/" + fileNameEdgeListVr3DCoords + ".csv"))
         {
             while (!reader.EndOfStream)
             {
@@ -33,18 +37,28 @@ public class DataReader : MonoBehaviour
 
                 if (line.Split(',')[0] != "from_name")
                 {
-                    Node newNode = new Node(line.Split(',')[0], "", new Vector3(float.Parse(line.Split(',')[4]),float.Parse(line.Split(',')[5]),float.Parse(line.Split(',')[6])));
-                    m_NodesTemp.Add(newNode);
+                    Node newNode = new Node(line.Split(',')[0], new Vector3(float.Parse(line.Split(',')[4]), float.Parse(line.Split(',')[5]), float.Parse(line.Split(',')[6])));
+                    nodesTemp.Add(newNode);
 
-                    GetCount(m_OutDegreeCounts, newNode.id);
-                    GetCount(m_InDegreeCounts, line.Split(',')[1]);
+                    GetCount(outDegreeCounts, newNode.Id);
+                    GetCount(inDegreeCounts, line.Split(',')[1]);
 
                     Edge newEdge = new Edge(line.Split(',')[0], line.Split(',')[1], float.Parse(line.Split(',')[2]), float.Parse(line.Split(',')[3]));
-                    m_Edges.Add(newEdge);
+                    Edges.Add(newEdge);
                 }
             }
         }
+
     }
+
+    void ConverttoList()
+    {
+        foreach (var item in nodesTemp)
+        {
+            Nodes.Add(item);
+        }
+    }
+
     void GetCount(Dictionary<string, int> dict, string id)
     {
         if (dict.ContainsKey(id))
@@ -59,16 +73,15 @@ public class DataReader : MonoBehaviour
 
     void AddDegreesToNodes()
     {
-        CheckForMissingKeys(m_OutDegreeCounts, m_InDegreeCounts);
-        CheckForMissingKeys(m_InDegreeCounts, m_OutDegreeCounts);
+        CheckForMissingKeys(outDegreeCounts, inDegreeCounts);
+        CheckForMissingKeys(inDegreeCounts, outDegreeCounts);
 
-        for (int i = 0; i < m_Nodes.Count; i++)
+        for (int i = 0; i < Nodes.Count; i++)
         {
-            Node n = m_Nodes[i];
-            n.m_OutDegree = m_OutDegreeCounts[n.id];
-            n.m_InDegree = m_InDegreeCounts[n.id];
-            n.m_Degree = n.m_InDegree + n.m_OutDegree;
-            m_Nodes[i] = n;
+            Node n = Nodes[i];
+            n.OutDegree = outDegreeCounts[n.Id];
+            n.InDegree = inDegreeCounts[n.Id];
+            Nodes[i] = n;
         }
     }
 
@@ -83,11 +96,30 @@ public class DataReader : MonoBehaviour
         }
     }
 
-    void ConvertToList()
+    void GetAndAssignEntityType()
     {
-        foreach (var item in m_NodesTemp)
+        using (var reader = new StreamReader("Assets/Data/" + fileNameEntityActivityTable + ".csv"))
         {
-            m_Nodes.Add(item);
+            while (!reader.EndOfStream)
+            {
+                var line = reader.ReadLine();
+
+                if (line.Split(',')[0] != "HANDLE")
+                {
+                    string id = line.Split(',')[0];
+                    if (!nameToEntityTypeMapping.ContainsKey(id))
+                    {
+                        nameToEntityTypeMapping.Add(line.Split(',')[0], line.Split(',')[2]);
+                    };
+                }
+            }
+        }
+
+        for (int i = 0; i < Nodes.Count; i++)
+        {
+            Node n = Nodes[i];
+            if (nameToEntityTypeMapping.ContainsKey(Nodes[i].Id)) n.EntityType = nameToEntityTypeMapping[Nodes[i].Id];
+            Nodes[i] = n;
         }
     }
 }
@@ -96,36 +128,29 @@ public class DataReader : MonoBehaviour
 [Serializable]
 public struct Node
 {
-    public string id;
-    public string entityType;
-    public int m_InDegree;
-    public int m_OutDegree;
-    public int m_Degree;
+    public string Id { get; set; }
+    public string EntityType { get; set; }
+    public int InDegree { get; set; }
+    public int OutDegree { get; set; }
+    public Vector3 Position { get; set; }
 
-    public Vector3 m_Position;
-    public Node(string id, string entityType, Vector3 position)
+    public Node(string id, Vector3 position)
     {
-        this.id = id;
-        this.entityType = entityType;
-        this.m_Position = position;
-        this.m_InDegree = 0;
-        this.m_OutDegree = 0;
-        this.m_Degree = 0;
-    }
-
-    public void ComputeDegree()
-    {
-        
+        this.Id = id;
+        this.Position = position;
+        this.InDegree = 0;
+        this.OutDegree = 0;
+        this.EntityType = "";
     }
 
     public override string ToString()
     {
-        return "Node with ID: " + this.id + " and EntityType: " + this.entityType;
+        return "Node with ID: " + this.Id + " and EntityType: " + this.EntityType;
     }
 }
 
 [Serializable]
-public struct Edge
+public class Edge
 {
     public string sourceID;
     public string targetID;
@@ -140,7 +165,6 @@ public struct Edge
         this.weight = weight;
     }
 }
-
 
 
 
