@@ -7,8 +7,8 @@ public class Visualizer : MonoBehaviour
     [Header("Entities")]
     [SerializeField] private List<GameObject> GroupSymbols = new List<GameObject>();
     [SerializeField] private List<GameObject> ChannelSymbols = new List<GameObject>();
-    [SerializeField] private List<GameObject> EdgeSymbols = new List<GameObject>();
-    [SerializeField] private List<GameObject> AllSymbols = new List<GameObject>();
+    [SerializeField] private List<GameObject> EdgeObjects = new List<GameObject>();
+    [SerializeField] private List<GameObject> NodeObjects = new List<GameObject>();
     [SerializeField] private List<Node> Nodes;
     [SerializeField] private List<Edge> Edges;
 
@@ -19,7 +19,7 @@ public class Visualizer : MonoBehaviour
     [SerializeField] private DataReader DataReader;
     [SerializeField] private float scalingFactor = 1f;
 
-    [Header("refabs")]
+    [Header("Prefabs")]
     [SerializeField] private GameObject pre_Node;
     [SerializeField] private GameObject pre_Edge;
 
@@ -38,31 +38,49 @@ public class Visualizer : MonoBehaviour
     {
         GetLists();
         CreateNodes();
-        SizeNodes();
-        LayOutNodes(AllSymbols);
+        LayOutNodes(NodeObjects);
         OffsetNodes(offset);
-        DrawEdges(Edges);
+        CreateEdges();
+        ForNodesAndEdgesFillConnectionProperties();
+        SetEdgePositionsandWidth();
+        SizeNodes();
     }
 
-    void DrawEdges(List<Edge> collection)
+    void CreateEdges()
     {
-        float maxWeight = GetWeights(Edges);
-        foreach (var item in collection)
+        foreach (var edge in Edges)
         {
             GameObject line = Instantiate(pre_Edge);
-            line.GetComponent<LineRenderer>().SetPositions(
+            EdgeData data = line.AddComponent<EdgeData>();
+            data.Source = edge.sourceID;
+            data.Target = edge.targetID;
+            data.Weight = edge.weight;
+
+            EdgeObjects.Add(line);
+        }
+    }
+
+    void SetEdgePositionsandWidth()
+    {
+        for (int i = 0; i < EdgeObjects.Count; i++)
+        {
+            GameObject line = EdgeObjects[i];
+            EdgeData data = line.GetComponent<EdgeData>();
+            EdgeObjects[i].GetComponent<LineRenderer>().SetPositions(
                 new Vector3[2]{
-                IdentifyNode(item.sourceID, AllSymbols).transform.position,
-                IdentifyNode(item.targetID, AllSymbols).transform.position,
+                data.SourceNode.transform.position,
+                data.TargetNode.transform.position
         }
             );
-            float width = Mathf.Lerp(MinEdgeWidth, MaxEdgeWidth, item.weight / maxWeight);
+
+            float maxWeight = GetWeights(Edges);
+            float width = Mathf.Lerp(MinEdgeWidth, MaxEdgeWidth, data.Weight / maxWeight);
             line.GetComponent<LineRenderer>().startWidth = width;
             line.GetComponent<LineRenderer>().endWidth = width;
 
-            line.GetComponent<LineRenderer>().startColor = Color.Lerp(MinColor, MaxColor, item.weight / maxWeight);
-            line.GetComponent<LineRenderer>().endColor = Color.Lerp(MinColor, MaxColor, item.weight / maxWeight);
-            EdgeSymbols.Add(line);
+            line.GetComponent<LineRenderer>().startColor = Color.Lerp(MinColor, MaxColor, data.Weight / maxWeight);
+            line.GetComponent<LineRenderer>().endColor = Color.Lerp(MinColor, MaxColor, data.Weight / maxWeight);
+
             line.transform.parent = EdgeParent.transform;
         }
     }
@@ -84,23 +102,35 @@ public class Visualizer : MonoBehaviour
         return Mathf.Max(weights.ToArray());
     }
 
-    GameObject IdentifyNode(string id, List<GameObject> list)
+    void ForNodesAndEdgesFillConnectionProperties()
     {
-        foreach (var item in list)
+        for (int i = 0; i < NodeObjects.Count; i++)
         {
-            if (item.GetComponent<Record>().Id == id)
+            NodeData n = NodeObjects[i].GetComponent<NodeData>();
+            for (int k = 0; k < EdgeObjects.Count; k++)
             {
-                return item;
+                EdgeData e = EdgeObjects[k].GetComponent<EdgeData>();
+                // Debug.Log("Edge source is " + e.Source + " and Node ID is " + n.Id + " and they are equal: " + e.Source == n.Id);
+                if (e.Source == n.Id)
+                {
+                    n.OutgoingEdges.Add(e.gameObject);
+                    e.SourceNode = n.gameObject;
+                }
+
+                if (e.Target == n.Id)
+                {
+                    n.IncomingEdges.Add(e.gameObject);
+                    e.TargetNode = n.gameObject;
+                };
             }
         }
-        return new GameObject();
     }
 
     void LayOutNodes(List<GameObject> symbols)
     {
         for (int i = 0; i < symbols.Count; i++)
         {
-            symbols[i].transform.position = symbols[i].GetComponent<Record>().Position * scalingFactor;
+            symbols[i].transform.position = symbols[i].GetComponent<NodeData>().Position * scalingFactor;
         }
     }
 
@@ -115,12 +145,10 @@ public class Visualizer : MonoBehaviour
         foreach (var node in Nodes)
         {
             GameObject mark = Instantiate(pre_Node);
-            mark.AddComponent<Record>();
-            mark.GetComponent<Record>().Id = node.Id;
-            mark.GetComponent<Record>().EntityType = node.EntityType;
-            mark.GetComponent<Record>().OutDegree = node.OutDegree;
-            mark.GetComponent<Record>().InDegree = node.InDegree;
-            mark.GetComponent<Record>().Position = node.Position;
+            NodeData data = mark.AddComponent<NodeData>();
+            data.Id = node.Id;
+            data.EntityType = node.EntityType;
+            data.Position = node.Position;
 
             mark.transform.parent = NodeParent.transform;
 
@@ -134,33 +162,26 @@ public class Visualizer : MonoBehaviour
                 mark.GetComponent<Renderer>().material.color = Pink;
                 ChannelSymbols.Add(mark);
             }
-        }
 
-        foreach (var item in GroupSymbols)
-        {
-            AllSymbols.Add(item);
-        }
-        foreach (var item in ChannelSymbols)
-        {
-            AllSymbols.Add(item);
+            NodeObjects.Add(mark);
         }
     }
 
     void SizeNodes()
     {
         List<float> degrees = new List<float>();
-        foreach (var item in Nodes)
+        foreach (var item in NodeObjects)
         {
-            degrees.Add(item.InDegree + item.OutDegree);
+            degrees.Add(item.GetComponent<NodeData>().IncomingEdges.Count + item.GetComponent<NodeData>().OutgoingEdges.Count);
         }
         float max = Mathf.Max(degrees.ToArray());
 
-        foreach (var item in AllSymbols)
+        foreach (var item in NodeObjects)
         {
             item.gameObject.transform.localScale = new Vector3(
-                Mathf.Lerp(MinSize, MaxSize, item.GetComponent<Record>().InDegree / max),
-                Mathf.Lerp(MinSize, MaxSize, item.GetComponent<Record>().InDegree / max),
-                Mathf.Lerp(MinSize, MaxSize, item.GetComponent<Record>().InDegree / max)
+                Mathf.Lerp(MinSize, MaxSize, item.GetComponent<NodeData>().IncomingEdges.Count / max),
+                Mathf.Lerp(MinSize, MaxSize, item.GetComponent<NodeData>().IncomingEdges.Count / max),
+                Mathf.Lerp(MinSize, MaxSize, item.GetComponent<NodeData>().IncomingEdges.Count / max)
             );
         }
     }

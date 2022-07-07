@@ -6,13 +6,16 @@ using System.Linq;
 
 public class DataReader : MonoBehaviour
 {
-
+    [Header("Data")]
     [SerializeField] private HashSet<Node> nodesTemp = new HashSet<Node>();
     public List<Node> Nodes { get; set; }
     public List<Edge> Edges { get; set; }
 
+    [Header("Files")]
     [SerializeField] private string fileNameEdgeListVr3DCoords = "";
     [SerializeField] private string fileNameEntityActivityTable = "";
+
+    [Header("Counts")]
     private Dictionary<string, int> outDegreeCounts = new Dictionary<string, int>();
     private Dictionary<string, int> inDegreeCounts = new Dictionary<string, int>();
     [SerializeField] private Dictionary<string, string> nameToEntityTypeMapping = new Dictionary<string, string>();
@@ -23,8 +26,7 @@ public class DataReader : MonoBehaviour
         Edges = new List<Edge>();
         ReadCSV();
         ConverttoList();
-        GetAndAssignEntityType();
-        AddDegreesToNodes();
+        AssignEntityTypePostsUsersLatLon();
     }
 
     void ReadCSV()
@@ -71,20 +73,6 @@ public class DataReader : MonoBehaviour
         }
     }
 
-    void AddDegreesToNodes()
-    {
-        CheckForMissingKeys(outDegreeCounts, inDegreeCounts);
-        CheckForMissingKeys(inDegreeCounts, outDegreeCounts);
-
-        for (int i = 0; i < Nodes.Count; i++)
-        {
-            Node n = Nodes[i];
-            n.OutDegree = outDegreeCounts[n.Id];
-            n.InDegree = inDegreeCounts[n.Id];
-            Nodes[i] = n;
-        }
-    }
-
     void CheckForMissingKeys(Dictionary<string, int> dict1, Dictionary<string, int> dict2)
     {
         foreach (var item in dict1)
@@ -96,7 +84,7 @@ public class DataReader : MonoBehaviour
         }
     }
 
-    void GetAndAssignEntityType()
+    void AssignEntityTypePostsUsersLatLon()
     {
         using (var reader = new StreamReader("Assets/Data/" + fileNameEntityActivityTable + ".csv"))
         {
@@ -111,6 +99,8 @@ public class DataReader : MonoBehaviour
                     {
                         nameToEntityTypeMapping.Add(line.Split(',')[0], line.Split(',')[2]);
                     };
+
+
                 }
             }
         }
@@ -124,23 +114,39 @@ public class DataReader : MonoBehaviour
     }
 }
 
+[Serializable]
+public struct MonthlyAction
+{
+    public string SentAt { get; set; }
+    public int PostsTotal { get; set; }
+    public int ActiveUsers { get; set; }
+    public float Latitude { get; set; }
+    public float Longitude { get; set; }
+
+    public MonthlyAction(string sentAt, int postsTotal, int activeUsers, float latitude, float longitude)
+    {
+        this.SentAt = sentAt;
+        this.PostsTotal = postsTotal;
+        this.ActiveUsers = activeUsers;
+        this.Latitude = latitude;
+        this.Longitude = longitude;
+    }
+}
 
 [Serializable]
 public struct Node
 {
     public string Id { get; set; }
     public string EntityType { get; set; }
-    public int InDegree { get; set; }
-    public int OutDegree { get; set; }
     public Vector3 Position { get; set; }
+    public MonthlyAction? MonthlyAction { get; set; }
 
     public Node(string id, Vector3 position)
     {
         this.Id = id;
         this.Position = position;
-        this.InDegree = 0;
-        this.OutDegree = 0;
         this.EntityType = "";
+        this.MonthlyAction = new MonthlyAction();
     }
 
     public override string ToString()

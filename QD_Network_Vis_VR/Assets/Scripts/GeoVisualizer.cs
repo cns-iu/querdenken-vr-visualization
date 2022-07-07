@@ -29,11 +29,11 @@ public class GeoVisualizer : MonoBehaviour
         foreach (Entity e in m_Entities)
         {
             g = Instantiate(pre_Node);
-            g.AddComponent<Record>().EntityType = e.entityType;
-            g.GetComponent<Record>().Id = e.name;
-            g.GetComponent<Record>().X = e.lat;
-            g.GetComponent<Record>().Z = e.lon;
-            g.GetComponent<Record>().ActiveUsers = e.activeUsers;
+            g.AddComponent<NodeData>().EntityType = e.entityType;
+            g.GetComponent<NodeData>().Id = e.name;
+            g.GetComponent<NodeData>().X = e.lat;
+            g.GetComponent<NodeData>().Z = e.lon;
+            g.GetComponent<NodeData>().ActiveUsers = e.activeUsers;
 
             if (e.entityType == "Group")
             {
@@ -52,7 +52,7 @@ public class GeoVisualizer : MonoBehaviour
     {
         for (int i = 0; i < m_Marks.Count; i++)
         {
-            m_Marks[i].transform.position = new Vector3(RescaleCoord(m_Marks[i].GetComponent<Record>().X), m_DisplayHeight, RescaleCoord(m_Marks[i].GetComponent<Record>().Z) * 1.3f);
+            m_Marks[i].transform.position = new Vector3(RescaleCoord(m_Marks[i].GetComponent<NodeData>().X), m_DisplayHeight, RescaleCoord(m_Marks[i].GetComponent<NodeData>().Z) * 1.3f);
         }
 
         foreach (var city in GeoDataReader.m_GermanCities)
@@ -76,7 +76,7 @@ public class GeoVisualizer : MonoBehaviour
             );
             b.transform.localScale = new Vector3(
                 b.transform.localScale.x,
-                 item.GetComponent<Record>().ActiveUsers,
+                 item.GetComponent<NodeData>().ActiveUsers,
                  b.transform.localScale.z
                  );
         }
