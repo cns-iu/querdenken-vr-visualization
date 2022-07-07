@@ -6,7 +6,6 @@ public class NodeData : MonoBehaviour
 {
     public string Id;
     public string EntityType;
-    public float ActiveUsers;
     public Vector3 Position;
     public float X { get; set; }
     public float Y { get; set; }

@@ -110,7 +110,7 @@ public class Visualizer : MonoBehaviour
             for (int k = 0; k < EdgeObjects.Count; k++)
             {
                 EdgeData e = EdgeObjects[k].GetComponent<EdgeData>();
-                // Debug.Log("Edge source is " + e.Source + " and Node ID is " + n.Id + " and they are equal: " + e.Source == n.Id);
+
                 if (e.Source == n.Id)
                 {
                     n.OutgoingEdges.Add(e.gameObject);

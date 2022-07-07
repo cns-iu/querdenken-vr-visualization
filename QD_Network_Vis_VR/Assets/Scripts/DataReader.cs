@@ -16,8 +16,6 @@ public class DataReader : MonoBehaviour
     [SerializeField] private string fileNameEntityActivityTable = "";
 
     [Header("Counts")]
-    private Dictionary<string, int> outDegreeCounts = new Dictionary<string, int>();
-    private Dictionary<string, int> inDegreeCounts = new Dictionary<string, int>();
     [SerializeField] private Dictionary<string, string> nameToEntityTypeMapping = new Dictionary<string, string>();
 
     void Awake()
@@ -26,7 +24,8 @@ public class DataReader : MonoBehaviour
         Edges = new List<Edge>();
         ReadCSV();
         ConverttoList();
-        AssignEntityTypePostsUsersLatLon();
+        ForNodesGetEntityType();
+        ForNodesGetMonthlyActions();
     }
 
     void ReadCSV()
@@ -42,15 +41,11 @@ public class DataReader : MonoBehaviour
                     Node newNode = new Node(line.Split(',')[0], new Vector3(float.Parse(line.Split(',')[4]), float.Parse(line.Split(',')[5]), float.Parse(line.Split(',')[6])));
                     nodesTemp.Add(newNode);
 
-                    GetCount(outDegreeCounts, newNode.Id);
-                    GetCount(inDegreeCounts, line.Split(',')[1]);
-
                     Edge newEdge = new Edge(line.Split(',')[0], line.Split(',')[1], float.Parse(line.Split(',')[2]), float.Parse(line.Split(',')[3]));
                     Edges.Add(newEdge);
                 }
             }
         }
-
     }
 
     void ConverttoList()
@@ -61,30 +56,7 @@ public class DataReader : MonoBehaviour
         }
     }
 
-    void GetCount(Dictionary<string, int> dict, string id)
-    {
-        if (dict.ContainsKey(id))
-        {
-            dict[id]++;
-        }
-        else
-        {
-            dict.Add(id, 1);
-        }
-    }
-
-    void CheckForMissingKeys(Dictionary<string, int> dict1, Dictionary<string, int> dict2)
-    {
-        foreach (var item in dict1)
-        {
-            if (!dict2.ContainsKey(item.Key))
-            {
-                dict2.Add(item.Key, 0);
-            }
-        }
-    }
-
-    void AssignEntityTypePostsUsersLatLon()
+    void ForNodesGetEntityType()
     {
         using (var reader = new StreamReader("Assets/Data/" + fileNameEntityActivityTable + ".csv"))
         {
@@ -99,8 +71,6 @@ public class DataReader : MonoBehaviour
                     {
                         nameToEntityTypeMapping.Add(line.Split(',')[0], line.Split(',')[2]);
                     };
-
-
                 }
             }
         }
@@ -112,18 +82,48 @@ public class DataReader : MonoBehaviour
             Nodes[i] = n;
         }
     }
+
+    void ForNodesGetMonthlyActions()
+    {
+        using (var reader = new StreamReader("Assets/Data/" + fileNameEntityActivityTable + ".csv"))
+        {
+            while (!reader.EndOfStream)
+            {
+                var line = reader.ReadLine();
+
+                if (line.Split(',')[0] != "HANDLE")
+                {
+                    for (int i = 0; i < Nodes.Count; i++)
+                    {
+                        Node n = Nodes[i];
+                        if (n.MonthlyActions == null)
+                        {
+                            n.MonthlyActions = new MonthlyActionWrapper();
+                            n.MonthlyActions.Wrapper = new List<Activity>();
+                        }
+
+                        if (line.Split(',')[0] == n.Id)
+                        {
+                            n.MonthlyActions.Wrapper.Add(new Activity(line.Split(',')[1], Convert.ToInt32(line.Split(',')[3]), Convert.ToInt32(line.Split(',')[4]), line.Split(',')[5], line.Split(',')[6]));
+                        }
+                        Nodes[i] = n;
+                    }
+                }
+            }
+        }
+    }
 }
 
 [Serializable]
-public struct MonthlyAction
+public struct Activity
 {
     public string SentAt { get; set; }
     public int PostsTotal { get; set; }
     public int ActiveUsers { get; set; }
-    public float Latitude { get; set; }
-    public float Longitude { get; set; }
+    public string Latitude { get; set; }
+    public string Longitude { get; set; }
 
-    public MonthlyAction(string sentAt, int postsTotal, int activeUsers, float latitude, float longitude)
+    public Activity(string sentAt, int postsTotal, int activeUsers, string latitude, string longitude)
     {
         this.SentAt = sentAt;
         this.PostsTotal = postsTotal;
@@ -134,24 +134,25 @@ public struct MonthlyAction
 }
 
 [Serializable]
+public class MonthlyActionWrapper
+{
+    public List<Activity> Wrapper;
+}
+
+[Serializable]
 public struct Node
 {
     public string Id { get; set; }
     public string EntityType { get; set; }
     public Vector3 Position { get; set; }
-    public MonthlyAction? MonthlyAction { get; set; }
+    public MonthlyActionWrapper MonthlyActions;
 
     public Node(string id, Vector3 position)
     {
         this.Id = id;
         this.Position = position;
         this.EntityType = "";
-        this.MonthlyAction = new MonthlyAction();
-    }
-
-    public override string ToString()
-    {
-        return "Node with ID: " + this.Id + " and EntityType: " + this.EntityType;
+        this.MonthlyActions = null;
     }
 }
 

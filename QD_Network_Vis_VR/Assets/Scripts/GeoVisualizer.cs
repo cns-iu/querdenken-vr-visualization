@@ -33,7 +33,6 @@ public class GeoVisualizer : MonoBehaviour
             g.GetComponent<NodeData>().Id = e.name;
             g.GetComponent<NodeData>().X = e.lat;
             g.GetComponent<NodeData>().Z = e.lon;
-            g.GetComponent<NodeData>().ActiveUsers = e.activeUsers;
 
             if (e.entityType == "Group")
             {
@@ -76,7 +75,7 @@ public class GeoVisualizer : MonoBehaviour
             );
             b.transform.localScale = new Vector3(
                 b.transform.localScale.x,
-                 item.GetComponent<NodeData>().ActiveUsers,
+                b.transform.localScale.y,
                  b.transform.localScale.z
                  );
         }
