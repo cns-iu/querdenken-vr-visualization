@@ -104,7 +104,7 @@ public class DataReader : MonoBehaviour
 
                         if (line.Split(',')[0] == n.Id)
                         {
-                            n.MonthlyActions.Wrapper.Add(new Activity(line.Split(',')[1], Convert.ToInt32(line.Split(',')[3]), Convert.ToInt32(line.Split(',')[4]), line.Split(',')[5], line.Split(',')[6]));
+                            n.MonthlyActions.Wrapper.Add(new Activity(line.Split(',')[0], line.Split(',')[1], line.Split(',')[2], Convert.ToInt32(line.Split(',')[3]), Convert.ToInt32(line.Split(',')[4]), line.Split(',')[5], line.Split(',')[6]));
                         }
                         Nodes[i] = n;
                     }
@@ -115,17 +115,21 @@ public class DataReader : MonoBehaviour
 }
 
 [Serializable]
-public struct Activity
+public class Activity
 {
-    public string SentAt { get; set; }
-    public int PostsTotal { get; set; }
-    public int ActiveUsers { get; set; }
-    public string Latitude { get; set; }
-    public string Longitude { get; set; }
+    [field: SerializeField] public string SentAt { get; private set; }
+    [field: SerializeField] public string Id { get; private set; }
+    [field: SerializeField] public string Group { get; private set; }
+    [field: SerializeField] public int PostsTotal { get; private set; }
+    [field: SerializeField] public int ActiveUsers { get; private set; }
+    [field: SerializeField] public string Latitude { get; private set; }
+    [field: SerializeField] public string Longitude { get; private set; }
 
-    public Activity(string sentAt, int postsTotal, int activeUsers, string latitude, string longitude)
+    public Activity(string id, string sentAt, string group, int postsTotal, int activeUsers, string latitude, string longitude)
     {
+        this.Id = id;
         this.SentAt = sentAt;
+        this.Group = group;
         this.PostsTotal = postsTotal;
         this.ActiveUsers = activeUsers;
         this.Latitude = latitude;
@@ -136,16 +140,16 @@ public struct Activity
 [Serializable]
 public class MonthlyActionWrapper
 {
-    public List<Activity> Wrapper;
+    [SerializeField] public List<Activity> Wrapper;
 }
 
 [Serializable]
 public struct Node
 {
-    public string Id { get; set; }
-    public string EntityType { get; set; }
-    public Vector3 Position { get; set; }
-    public MonthlyActionWrapper MonthlyActions;
+    [field: SerializeField] public string Id { get; private set; }
+    [field: SerializeField] public string EntityType { get; set; }
+    [field: SerializeField] public Vector3 Position { get; private set; }
+    [field: SerializeField] public MonthlyActionWrapper MonthlyActions { get; set; }
 
     public Node(string id, Vector3 position)
     {
@@ -159,10 +163,10 @@ public struct Node
 [Serializable]
 public class Edge
 {
-    public string sourceID;
-    public string targetID;
-    public float weight;
-    public float sentAtQuarter;
+    [field: SerializeField] public string sourceID { get; private set; }
+    [field: SerializeField] public string targetID { get; private set; }
+    [field: SerializeField] public float weight { get; private set; }
+    [field: SerializeField] public float sentAtQuarter { get; private set; }
 
     public Edge(string sourceID, string targetID, float sentAtQuarter, float weight)
     {

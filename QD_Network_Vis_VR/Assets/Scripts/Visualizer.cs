@@ -149,6 +149,7 @@ public class Visualizer : MonoBehaviour
             data.Id = node.Id;
             data.EntityType = node.EntityType;
             data.Position = node.Position;
+            data.Activities = node.MonthlyActions;
 
             mark.transform.parent = NodeParent.transform;
 
