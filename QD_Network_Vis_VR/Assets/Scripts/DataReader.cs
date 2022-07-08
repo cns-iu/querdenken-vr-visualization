@@ -7,16 +7,16 @@ using System.Linq;
 public class DataReader : MonoBehaviour
 {
     [Header("Data")]
-    [SerializeField] private HashSet<Node> nodesTemp = new HashSet<Node>();
-    public List<Node> Nodes { get; set; }
-    public List<Edge> Edges { get; set; }
+    [field: SerializeField] private HashSet<Node> nodesTemp = new HashSet<Node>();
+    [field: SerializeField] public List<Node> Nodes { get; set; }
+    [field: SerializeField] public List<Edge> Edges { get; set; }
 
     [Header("Files")]
     [SerializeField] private string fileNameEdgeListVr3DCoords = "";
     [SerializeField] private string fileNameEntityActivityTable = "";
 
     [Header("Counts")]
-    [SerializeField] private Dictionary<string, string> nameToEntityTypeMapping = new Dictionary<string, string>();
+    [field: SerializeField] private Dictionary<string, string> nameToEntityTypeMapping = new Dictionary<string, string>();
 
     void Awake()
     {
@@ -41,7 +41,7 @@ public class DataReader : MonoBehaviour
                     Node newNode = new Node(line.Split(',')[0], new Vector3(float.Parse(line.Split(',')[4]), float.Parse(line.Split(',')[5]), float.Parse(line.Split(',')[6])));
                     nodesTemp.Add(newNode);
 
-                    Edge newEdge = new Edge(line.Split(',')[0], line.Split(',')[1], float.Parse(line.Split(',')[2]), float.Parse(line.Split(',')[3]));
+                    Edge newEdge = new Edge(line.Split(',')[0], line.Split(',')[1], int.Parse(line.Split(',')[2]), float.Parse(line.Split(',')[3]));
                     Edges.Add(newEdge);
                 }
             }
@@ -163,17 +163,17 @@ public struct Node
 [Serializable]
 public class Edge
 {
-    [field: SerializeField] public string sourceID { get; private set; }
-    [field: SerializeField] public string targetID { get; private set; }
-    [field: SerializeField] public float weight { get; private set; }
-    [field: SerializeField] public float sentAtQuarter { get; private set; }
+    [field: SerializeField] public string SourceID { get; private set; }
+    [field: SerializeField] public string TargetID { get; private set; }
+    [field: SerializeField] public float Weight { get; private set; }
+    [field: SerializeField] public int TimeStep { get; private set; }
 
-    public Edge(string sourceID, string targetID, float sentAtQuarter, float weight)
+    public Edge(string sourceID, string targetID, int sentAtQuarter, float weight)
     {
-        this.sourceID = sourceID;
-        this.targetID = targetID;
-        this.sentAtQuarter = sentAtQuarter;
-        this.weight = weight;
+        this.SourceID = sourceID;
+        this.TargetID = targetID;
+        this.TimeStep = sentAtQuarter;
+        this.Weight = weight;
     }
 }
 

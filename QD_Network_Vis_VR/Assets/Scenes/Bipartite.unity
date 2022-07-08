@@ -261,7 +261,7 @@ GameObject:
   m_Component:
   - component: {fileID: 415679788}
   m_Layer: 0
-  m_Name: Edges
+  m_Name: EdgeParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -280,7 +280,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &459896541
 GameObject:
@@ -483,7 +483,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &463060421
 MonoBehaviour:
@@ -543,6 +543,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f0852582ef5b22745bf5a94614e36283, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <Nodes>k__BackingField: []
+  <Edges>k__BackingField: []
   fileNameEdgeListVr3DCoords: edgelist_vr_3dcoords
   fileNameEntityActivityTable: entity_activity_table
 --- !u!1 &705507993
@@ -719,7 +721,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 6
+  m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1104278013
 MonoBehaviour:
@@ -749,6 +751,54 @@ MonoBehaviour:
   m_TrackedDeviceOrientationAction: {fileID: 7970375526676320489, guid: ca9f5fa95ffab41fb9a615ab714db018, type: 3}
   m_DeselectOnBackgroundClick: 1
   m_PointerBehavior: 0
+--- !u!1 &1126631828
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1126631830}
+  - component: {fileID: 1126631829}
+  m_Layer: 0
+  m_Name: SceneConfiguration
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1126631829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1126631828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 247d3fc47f97cfb458165017fefc3cd7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  <StartTimeStep>k__BackingField: 0
+  <EndTimeStep>k__BackingField: 21
+  visualizer: {fileID: 1931070841}
+  edgeObjects: []
+--- !u!4 &1126631830
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1126631828}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.56853586, y: 1.182693, z: 0.7253268}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1315531628
 GameObject:
   m_ObjectHideFlags: 0
@@ -846,7 +896,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1315531633
 MonoBehaviour:
@@ -1076,7 +1126,7 @@ Transform:
   m_Children:
   - {fileID: 926345419}
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1525126317
 MonoBehaviour:
@@ -1656,7 +1706,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1830837602}
   m_Layer: 0
-  m_Name: Nodes
+  m_Name: NodeParent
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1675,7 +1725,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1931070838
 GameObject:
@@ -1721,27 +1771,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cb34e74cdc3cfac40a35b646b9bb70e1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GroupSymbols: []
-  ChannelSymbols: []
   EdgeObjects: []
   NodeObjects: []
-  Nodes: []
-  Edges: []
-  NodeParent: {fileID: 1830837601}
-  EdgeParent: {fileID: 415679787}
+  nodes: []
+  edges: []
+  groupSymbols: []
+  channelSymbols: []
+  nodeParent: {fileID: 1830837601}
+  edgeParent: {fileID: 415679787}
   offset: {x: -1, y: 2, z: -3}
   DataReader: {fileID: 602870904}
   scalingFactor: 0.3
   pre_Node: {fileID: 7028104876401859619, guid: 3c45085a4a4324d42babf62d6ca8fffa, type: 3}
   pre_Edge: {fileID: 2871238719833672595, guid: 492e84e8f9101dd4db7b6709a2adc65a, type: 3}
-  Blue: {r: 0.12941177, g: 0.5882353, b: 0.9529412, a: 1}
-  Pink: {r: 0.9137255, g: 0.11764706, b: 0.3882353, a: 1}
-  MaxEdgeWidth: 0.05
-  MinEdgeWidth: 0.005
-  MaxColor: {r: 1, g: 0.75686276, b: 0.02745098, a: 0.5882353}
-  MinColor: {r: 0.9764706, g: 0.9843137, b: 0.90588236, a: 0.54509807}
-  MinSize: 0.03
-  MaxSize: 0.5
+  groupColor: {r: 0.12941177, g: 0.5882353, b: 0.9529412, a: 1}
+  channelColor: {r: 0.9137255, g: 0.11764706, b: 0.3882353, a: 1}
+  maxEdgeWidth: 0.03
+  minEdgeWidth: 0.01
+  maxEdgeColor: {r: 1, g: 0.75686276, b: 0.02745098, a: 0.44705883}
+  minEdgeColor: {r: 0.9764706, g: 0.9843137, b: 0.90588236, a: 0.43137255}
+  minNodeSize: 0.05
+  maxNodeSize: 0.5
 --- !u!1 &2110648074
 GameObject:
   m_ObjectHideFlags: 0

@@ -164,7 +164,7 @@ PlayerSettings:
   androidSupportedAspectRatio: 1
   androidMaxAspectRatio: 2.1
   applicationIdentifier:
-    Android: com.DefaultCompany.QD_Network_Vis_VR
+    Android: com.AndreasBueckle.QD_Network_Vis_VR
     Standalone: com.DefaultCompany.QDNetworkVisVR
   buildNumber:
     Standalone: 0
@@ -820,7 +820,7 @@ PlayerSettings:
     m_VersionCode: 1
     m_VersionName: 
   apiCompatibilityLevel: 6
-  activeInputHandler: 1
+  activeInputHandler: 2
   cloudProjectId: 
   framebufferDepthMemorylessMode: 0
   qualitySettingsNames: []
