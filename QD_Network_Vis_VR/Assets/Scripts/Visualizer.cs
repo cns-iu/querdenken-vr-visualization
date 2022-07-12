@@ -167,6 +167,10 @@ public class Visualizer : MonoBehaviour
 
             NodeObjects.Add(mark);
         }
+
+        // Debug.LogFormat("First node has {0} active users in month {1}", NodeObjects[0].GetComponent<NodeData>().Activities.Wrapper[10].ActiveUsers,
+        //  NodeObjects[0].GetComponent<NodeData>().Activities.Wrapper[10].SentAt);
+
     }
 
     void SizeNodes()
