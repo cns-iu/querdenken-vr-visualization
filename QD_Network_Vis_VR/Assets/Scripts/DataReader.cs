@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
@@ -7,25 +6,31 @@ using System.Linq;
 
 public class DataReader : MonoBehaviour
 {
+    [Header("Data")]
+    [field: SerializeField] private HashSet<Node> nodesTemp = new HashSet<Node>();
+    [field: SerializeField] public List<Node> Nodes { get; set; }
+    [field: SerializeField] public List<Edge> Edges { get; set; }
 
-    public HashSet<Node> m_NodesTemp = new HashSet<Node>();
-    public List<Node> m_Nodes = new List<Node>();
+    [Header("Files")]
+    [SerializeField] private string fileNameEdgeListVr3DCoords = "";
+    [SerializeField] private string fileNameEntityActivityTable = "";
 
-    //[0] in-m_Degree, [1]  out-m_Degree
-    public Dictionary<string, int> m_OutDegreeCounts = new Dictionary<string, int>();
-    public Dictionary<string, int> m_InDegreeCounts = new Dictionary<string, int>();
-    public List<Edge> m_Edges = new List<Edge>();
-    [SerializeField] private string m_Filename = "prelim_network_data_QD.csv";
-    // Start is called before the first frame update
+    [Header("Counts")]
+    [field: SerializeField] private Dictionary<string, string> nameToEntityTypeMapping = new Dictionary<string, string>();
+
     void Awake()
     {
+        Nodes = new List<Node>();
+        Edges = new List<Edge>();
         ReadCSV();
-        ConvertToList();
-        AddDegreesToNodes();
+        ConverttoList();
+        ForNodesGetEntityType();
+        ForNodesGetMonthlyActions();
     }
+
     void ReadCSV()
     {
-        using (var reader = new StreamReader("Assets/Data/" + m_Filename))
+        using (var reader = new StreamReader("Assets/Data/" + fileNameEdgeListVr3DCoords + ".csv"))
         {
             while (!reader.EndOfStream)
             {
@@ -33,114 +38,144 @@ public class DataReader : MonoBehaviour
 
                 if (line.Split(',')[0] != "from_name")
                 {
-                    Node newNode = new Node(line.Split(',')[0], "", new Vector3(float.Parse(line.Split(',')[4]),float.Parse(line.Split(',')[5]),float.Parse(line.Split(',')[6])));
-                    m_NodesTemp.Add(newNode);
+                    Node newNode = new Node(line.Split(',')[0], new Vector3(float.Parse(line.Split(',')[4]), float.Parse(line.Split(',')[5]), float.Parse(line.Split(',')[6])));
+                    nodesTemp.Add(newNode);
 
-                    GetCount(m_OutDegreeCounts, newNode.id);
-                    GetCount(m_InDegreeCounts, line.Split(',')[1]);
-
-                    Edge newEdge = new Edge(line.Split(',')[0], line.Split(',')[1], float.Parse(line.Split(',')[2]), float.Parse(line.Split(',')[3]));
-                    m_Edges.Add(newEdge);
+                    Edge newEdge = new Edge(line.Split(',')[0], line.Split(',')[1], int.Parse(line.Split(',')[2]), float.Parse(line.Split(',')[3]));
+                    Edges.Add(newEdge);
                 }
             }
         }
     }
-    void GetCount(Dictionary<string, int> dict, string id)
+
+    void ConverttoList()
     {
-        if (dict.ContainsKey(id))
+        foreach (var item in nodesTemp)
         {
-            dict[id]++;
-        }
-        else
-        {
-            dict.Add(id, 1);
+            Nodes.Add(item);
         }
     }
 
-    void AddDegreesToNodes()
+    void ForNodesGetEntityType()
     {
-        CheckForMissingKeys(m_OutDegreeCounts, m_InDegreeCounts);
-        CheckForMissingKeys(m_InDegreeCounts, m_OutDegreeCounts);
-
-        for (int i = 0; i < m_Nodes.Count; i++)
+        using (var reader = new StreamReader("Assets/Data/" + fileNameEntityActivityTable + ".csv"))
         {
-            Node n = m_Nodes[i];
-            n.m_OutDegree = m_OutDegreeCounts[n.id];
-            n.m_InDegree = m_InDegreeCounts[n.id];
-            n.m_Degree = n.m_InDegree + n.m_OutDegree;
-            m_Nodes[i] = n;
-        }
-    }
-
-    void CheckForMissingKeys(Dictionary<string, int> dict1, Dictionary<string, int> dict2)
-    {
-        foreach (var item in dict1)
-        {
-            if (!dict2.ContainsKey(item.Key))
+            while (!reader.EndOfStream)
             {
-                dict2.Add(item.Key, 0);
+                var line = reader.ReadLine();
+
+                if (line.Split(',')[0] != "HANDLE")
+                {
+                    string id = line.Split(',')[0];
+                    if (!nameToEntityTypeMapping.ContainsKey(id))
+                    {
+                        nameToEntityTypeMapping.Add(line.Split(',')[0], line.Split(',')[2]);
+                    };
+                }
             }
         }
+
+        for (int i = 0; i < Nodes.Count; i++)
+        {
+            Node n = Nodes[i];
+            if (nameToEntityTypeMapping.ContainsKey(Nodes[i].Id)) n.EntityType = nameToEntityTypeMapping[Nodes[i].Id];
+            Nodes[i] = n;
+        }
     }
 
-    void ConvertToList()
+    void ForNodesGetMonthlyActions()
     {
-        foreach (var item in m_NodesTemp)
+        using (var reader = new StreamReader("Assets/Data/" + fileNameEntityActivityTable + ".csv"))
         {
-            m_Nodes.Add(item);
+            while (!reader.EndOfStream)
+            {
+                var line = reader.ReadLine();
+
+                if (line.Split(',')[0] != "HANDLE")
+                {
+                    for (int i = 0; i < Nodes.Count; i++)
+                    {
+                        Node n = Nodes[i];
+                        if (n.MonthlyActions == null)
+                        {
+                            n.MonthlyActions = new MonthlyActionWrapper();
+                            n.MonthlyActions.Wrapper = new List<Activity>();
+                        }
+
+                        if (line.Split(',')[0] == n.Id)
+                        {
+                            n.MonthlyActions.Wrapper.Add(new Activity(line.Split(',')[0], line.Split(',')[1], line.Split(',')[2], Convert.ToInt32(line.Split(',')[3]), Convert.ToInt32(line.Split(',')[4]), line.Split(',')[5], line.Split(',')[6]));
+                        }
+                        Nodes[i] = n;
+                    }
+                }
+            }
         }
     }
 }
 
+[Serializable]
+public class Activity
+{
+    [field: SerializeField] public string SentAt { get; private set; }
+    [field: SerializeField] public string Id { get; private set; }
+    [field: SerializeField] public string Group { get; private set; }
+    [field: SerializeField] public int PostsTotal { get; private set; }
+    [field: SerializeField] public int ActiveUsers { get; private set; }
+    [field: SerializeField] public string Latitude { get; private set; }
+    [field: SerializeField] public string Longitude { get; private set; }
+
+    public Activity(string id, string sentAt, string group, int postsTotal, int activeUsers, string latitude, string longitude)
+    {
+        this.Id = id;
+        this.SentAt = sentAt;
+        this.Group = group;
+        this.PostsTotal = postsTotal;
+        this.ActiveUsers = activeUsers;
+        this.Latitude = latitude;
+        this.Longitude = longitude;
+    }
+}
+
+[Serializable]
+public class MonthlyActionWrapper
+{
+    [SerializeField] public List<Activity> Wrapper;
+}
 
 [Serializable]
 public struct Node
 {
-    public string id;
-    public string entityType;
-    public int m_InDegree;
-    public int m_OutDegree;
-    public int m_Degree;
+    [field: SerializeField] public string Id { get; private set; }
+    [field: SerializeField] public string EntityType { get; set; }
+    [field: SerializeField] public Vector3 Position { get; private set; }
+    [field: SerializeField] public MonthlyActionWrapper MonthlyActions { get; set; }
 
-    public Vector3 m_Position;
-    public Node(string id, string entityType, Vector3 position)
+    public Node(string id, Vector3 position)
     {
-        this.id = id;
-        this.entityType = entityType;
-        this.m_Position = position;
-        this.m_InDegree = 0;
-        this.m_OutDegree = 0;
-        this.m_Degree = 0;
-    }
-
-    public void ComputeDegree()
-    {
-        
-    }
-
-    public override string ToString()
-    {
-        return "Node with ID: " + this.id + " and EntityType: " + this.entityType;
+        this.Id = id;
+        this.Position = position;
+        this.EntityType = "";
+        this.MonthlyActions = null;
     }
 }
 
 [Serializable]
-public struct Edge
+public class Edge
 {
-    public string sourceID;
-    public string targetID;
-    public float weight;
-    public float sentAtQuarter;
+    [field: SerializeField] public string SourceID { get; private set; }
+    [field: SerializeField] public string TargetID { get; private set; }
+    [field: SerializeField] public float Weight { get; private set; }
+    [field: SerializeField] public int TimeStep { get; private set; }
 
-    public Edge(string sourceID, string targetID, float sentAtQuarter, float weight)
+    public Edge(string sourceID, string targetID, int sentAtQuarter, float weight)
     {
-        this.sourceID = sourceID;
-        this.targetID = targetID;
-        this.sentAtQuarter = sentAtQuarter;
-        this.weight = weight;
+        this.SourceID = sourceID;
+        this.TargetID = targetID;
+        this.TimeStep = sentAtQuarter;
+        this.Weight = weight;
     }
 }
-
 
 
 
