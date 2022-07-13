@@ -780,8 +780,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 247d3fc47f97cfb458165017fefc3cd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  <AppState>k__BackingField: 0
   <StartTimeStep>k__BackingField: 0
-  <EndTimeStep>k__BackingField: 21
+  <EndTimeStep>k__BackingField: 0
   visualizer: {fileID: 1931070841}
   edgeObjects: []
 --- !u!4 &1126631830
@@ -1777,6 +1778,7 @@ MonoBehaviour:
   edges: []
   groupSymbols: []
   channelSymbols: []
+  sceneConfiguration: {fileID: 1126631829}
   nodeParent: {fileID: 1830837601}
   edgeParent: {fileID: 415679787}
   offset: {x: -1, y: 2, z: -3}

@@ -13,6 +13,7 @@ public class Visualizer : MonoBehaviour
     [field: SerializeField] private List<GameObject> channelSymbols = new List<GameObject>();
 
     [Header("Scene Setup")]
+    [field: SerializeField] private SceneConfiguration sceneConfiguration;
     [field: SerializeField] private GameObject nodeParent;
     [field: SerializeField] private GameObject edgeParent;
     [field: SerializeField] private Vector3 offset = new Vector3(-1f, 2f, -3f);
@@ -38,12 +39,23 @@ public class Visualizer : MonoBehaviour
     {
         GetLists();
         CreateNodes();
-        LayOutNodes(NodeObjects);
-        OffsetNodes(offset);
-        CreateEdges();
-        ForNodesAndEdgesFillConnectionProperties();
-        SetEdgePositionsandWidth();
-        SizeNodes();
+        switch (sceneConfiguration.GetComponent<SceneConfiguration>().AppState)
+        {
+            case AppState.Network:
+             
+                LayOutNodes(NodeObjects);
+                OffsetNodes(offset);
+                CreateEdges();
+                ForNodesAndEdgesFillConnectionProperties();
+                SetEdgePositionsandWidth();
+                SizeNodes();
+                break;
+            case AppState.Geospatial:
+                break;
+            default:
+                break;
+        }
+
     }
 
     void CreateEdges()
