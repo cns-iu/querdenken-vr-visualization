@@ -13,4 +13,6 @@ public class NodeData : MonoBehaviour
     public List<GameObject> OutgoingEdges = new List<GameObject>();
     public List<GameObject> IncomingEdges = new List<GameObject>();
     public MonthlyActionWrapper Activities = new MonthlyActionWrapper();
+    public float Latitude;
+    public float Longitude;
 }

@@ -1,19 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System;
 
 public enum AppState { Network, Geospatial }
 
 public class SceneConfiguration : MonoBehaviour
 {
-    [field: SerializeField] public AppState AppState { get; set; }
+    [field: SerializeField] public AppState AppState;
     [field: SerializeField] public int StartTimeStep { get; set; }
     [field: SerializeField] public int EndTimeStep { get; set; }
-    public delegate void AppStateChange(AppState newState);
-    public static event AppStateChange StateChangeEvent;
 
-    [Header("Objects in scene")]
+    public static event Action<SceneConfigurationChange> SceneConfigChange;
+
+    [Header("References in scene")]
     [SerializeField] private Visualizer visualizer;
     [SerializeField] private List<GameObject> edgeObjects;
 
@@ -22,6 +22,9 @@ public class SceneConfiguration : MonoBehaviour
         edgeObjects = visualizer.EdgeObjects;
     }
 
+    /// <summary>
+    /// Temporary method to add a time filter
+    /// </summary>
     public void FilterByTimeStep()
     {
         for (int i = 0; i < edgeObjects.Count; i++)
@@ -33,9 +36,17 @@ public class SceneConfiguration : MonoBehaviour
 
     private void Update()
     {
+
         if (Input.GetKeyDown(KeyCode.F))
         {
             FilterByTimeStep();
         }
     }
+}
+
+public class SceneConfigurationChange
+{
+    [field: SerializeField] public AppState NewState { get; set; }
+    [field: SerializeField] public int StartTimeStep { get; set; }
+    [field: SerializeField] public int EndTimeStep { get; set; }
 }

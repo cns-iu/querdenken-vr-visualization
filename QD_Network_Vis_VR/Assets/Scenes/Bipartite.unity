@@ -407,7 +407,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 1
-  m_BackGroundColor: {r: 0.03529412, g: 0.0627451, b: 0.11372549, a: 1}
+  m_BackGroundColor: {r: 0.05490196, g: 0.11372549, b: 0.15686275, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -483,7 +483,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 8
+  m_RootOrder: 9
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &463060421
 MonoBehaviour:
@@ -499,6 +499,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_ActionAssets:
   - {fileID: -944628639613478452, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+--- !u!1 &517386037
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 517386038}
+  m_Layer: 0
+  m_Name: CityParent
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &517386038
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 517386037}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 8.45713, y: 1.8965721, z: 45.962273}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 7
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &602870902
 GameObject:
   m_ObjectHideFlags: 0
@@ -545,8 +576,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <Nodes>k__BackingField: []
   <Edges>k__BackingField: []
+  <Cities>k__BackingField: []
   fileNameEdgeListVr3DCoords: edgelist_vr_3dcoords
   fileNameEntityActivityTable: entity_activity_table
+  fileNameGermanCities: de
 --- !u!1 &705507993
 GameObject:
   m_ObjectHideFlags: 0
@@ -721,7 +754,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1104278013
 MonoBehaviour:
@@ -780,7 +813,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 247d3fc47f97cfb458165017fefc3cd7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  <AppState>k__BackingField: 0
+  AppState: 1
   <StartTimeStep>k__BackingField: 0
   <EndTimeStep>k__BackingField: 0
   visualizer: {fileID: 1931070841}
@@ -798,7 +831,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1315531628
 GameObject:
@@ -854,7 +887,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0230dc1738cc7964bb7d389facf2ade4, type: 2}
+  - {fileID: 2100000, guid: 32d5d3cc93b61914c82013040d1020b7, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1127,7 +1160,7 @@ Transform:
   m_Children:
   - {fileID: 926345419}
   m_Father: {fileID: 0}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1525126317
 MonoBehaviour:
@@ -1758,7 +1791,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1931070841
 MonoBehaviour:
@@ -1774,26 +1807,33 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   EdgeObjects: []
   NodeObjects: []
+  CityObjects: []
   nodes: []
   edges: []
+  cities: []
   groupSymbols: []
   channelSymbols: []
   sceneConfiguration: {fileID: 1126631829}
+  currentState: 0
   nodeParent: {fileID: 1830837601}
   edgeParent: {fileID: 415679787}
-  offset: {x: -1, y: 2, z: -3}
+  cityParent: {fileID: 517386037}
+  offsetNetwork: {x: -1, y: 2, z: -3}
+  offsetGeospatial: {x: -12, y: 2, z: -50}
   DataReader: {fileID: 602870904}
   scalingFactor: 0.3
   pre_Node: {fileID: 7028104876401859619, guid: 3c45085a4a4324d42babf62d6ca8fffa, type: 3}
   pre_Edge: {fileID: 2871238719833672595, guid: 492e84e8f9101dd4db7b6709a2adc65a, type: 3}
+  pre_City: {fileID: 8142125246637869229, guid: 0037f1d975ce3c5428336d81e2f8bb01, type: 3}
   groupColor: {r: 0.12941177, g: 0.5882353, b: 0.9529412, a: 1}
   channelColor: {r: 0.9137255, g: 0.11764706, b: 0.3882353, a: 1}
-  maxEdgeWidth: 0.03
-  minEdgeWidth: 0.01
+  maxEdgeWidth: 0.02
+  minEdgeWidth: 0.006
   maxEdgeColor: {r: 1, g: 0.75686276, b: 0.02745098, a: 0.44705883}
   minEdgeColor: {r: 0.9764706, g: 0.9843137, b: 0.90588236, a: 0.43137255}
-  minNodeSize: 0.05
+  minNodeSize: 0.1
   maxNodeSize: 0.5
+  verticcalOffsetForNodeStacks: 0.2
 --- !u!1 &2110648074
 GameObject:
   m_ObjectHideFlags: 0

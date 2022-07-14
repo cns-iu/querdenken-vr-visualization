@@ -1,28 +1,36 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class Visualizer : MonoBehaviour
 {
     [Header("Entities")]
     [field: SerializeField] public List<GameObject> EdgeObjects = new List<GameObject>();
     [field: SerializeField] public List<GameObject> NodeObjects = new List<GameObject>();
+    [field: SerializeField] public List<GameObject> CityObjects = new List<GameObject>();
     [field: SerializeField] private List<Node> nodes;
     [field: SerializeField] private List<Edge> edges;
+    [field: SerializeField] private List<City> cities;
     [field: SerializeField] private List<GameObject> groupSymbols = new List<GameObject>();
     [field: SerializeField] private List<GameObject> channelSymbols = new List<GameObject>();
+    [field: SerializeField] Dictionary<float, List<GameObject>> DictLatNode = new Dictionary<float, List<GameObject>>();
 
     [Header("Scene Setup")]
     [field: SerializeField] private SceneConfiguration sceneConfiguration;
+    [field: SerializeField] private AppState currentState;
     [field: SerializeField] private GameObject nodeParent;
     [field: SerializeField] private GameObject edgeParent;
-    [field: SerializeField] private Vector3 offset = new Vector3(-1f, 2f, -3f);
+    [field: SerializeField] private GameObject cityParent;
+    [field: SerializeField] private Vector3 offsetNetwork = new Vector3(-1f, 2f, -3f);
+    [field: SerializeField] private Vector3 offsetGeospatial = new Vector3(-12f, 2f, -50f);
     [field: SerializeField] private DataReader DataReader;
     [field: SerializeField] private float scalingFactor = 1f;
 
     [Header("Prefabs")]
     [field: SerializeField] private GameObject pre_Node;
     [field: SerializeField] private GameObject pre_Edge;
+    [field: SerializeField] private GameObject pre_City;
 
     [Header("Visual Encoding")]
     [field: SerializeField] private Color groupColor;
@@ -33,29 +41,60 @@ public class Visualizer : MonoBehaviour
     [field: SerializeField] private Color minEdgeColor;
     [field: SerializeField] private float minNodeSize;
     [field: SerializeField] private float maxNodeSize;
-
+    [field: SerializeField] private float verticcalOffsetForNodeStacks = .5f;
 
     void Start()
     {
+        SetAppState();
+
         GetLists();
         CreateNodes();
-        switch (sceneConfiguration.GetComponent<SceneConfiguration>().AppState)
+        LayOutNodes();
+        if (currentState == AppState.Geospatial)
         {
-            case AppState.Network:
-             
-                LayOutNodes(NodeObjects);
-                OffsetNodes(offset);
-                CreateEdges();
-                ForNodesAndEdgesFillConnectionProperties();
-                SetEdgePositionsandWidth();
-                SizeNodes();
-                break;
-            case AppState.Geospatial:
-                break;
-            default:
-                break;
+            CrateAndPlaceCities();
+            StackNodes();
+            OffsetNodes(offsetGeospatial);
+        }
+        else
+        {
+            OffsetNodes(offsetNetwork);
         }
 
+        CreateEdges();
+        ForNodesAndEdgesFillConnectionProperties();
+        SetEdgePositionsandWidth();
+        SizeNodes();
+
+
+    }
+
+    void SetAppState()
+    {
+        currentState = sceneConfiguration.GetComponent<SceneConfiguration>().AppState;
+    }
+
+    void CrateAndPlaceCities()
+    {
+        for (int i = 0; i < cities.Count; i++)
+        {
+            City cityRawData = cities[i];
+            GameObject city = Instantiate(pre_City);
+
+            CityData data = city.AddComponent<CityData>();
+            data.name = cityRawData.Name;
+            data.Latitude = cityRawData.Latitude;
+            data.Longitude = cityRawData.Longitude;
+            data.Population = cityRawData.Population;
+
+            city.transform.position = new Vector3(
+                data.Longitude,
+                0f,
+                data.Latitude
+            );
+            city.transform.parent = cityParent.transform;
+            CityObjects.Add(city);
+        }
     }
 
     void CreateEdges()
@@ -102,6 +141,7 @@ public class Visualizer : MonoBehaviour
     {
         nodes = DataReader.Nodes;
         edges = DataReader.Edges;
+        cities = DataReader.Cities;
     }
 
     float GetWeights(List<Edge> collection)
@@ -139,11 +179,22 @@ public class Visualizer : MonoBehaviour
         }
     }
 
-    void LayOutNodes(List<GameObject> symbols)
+    void LayOutNodes()
     {
-        for (int i = 0; i < symbols.Count; i++)
+        for (int i = 0; i < NodeObjects.Count; i++)
         {
-            symbols[i].transform.position = symbols[i].GetComponent<NodeData>().Position * scalingFactor;
+            if (currentState == AppState.Network)
+            {
+                NodeObjects[i].transform.position = NodeObjects[i].GetComponent<NodeData>().Position * scalingFactor;
+            }
+            else
+            {
+                NodeObjects[i].transform.position = new Vector3(
+                NodeObjects[i].GetComponent<NodeData>().Longitude,
+                0f,
+                NodeObjects[i].GetComponent<NodeData>().Latitude
+                );
+            }
         }
     }
 
@@ -151,6 +202,32 @@ public class Visualizer : MonoBehaviour
     {
         edgeParent.transform.Translate(offset);
         nodeParent.transform.Translate(offset);
+        cityParent.transform.Translate(offset);
+        cityParent.transform.Translate(0f, -.5f, 0f);
+    }
+
+    void StackNodes()
+    {
+        for (int i = 0; i < NodeObjects.Count; i++)
+        {
+            NodeData data = NodeObjects[i].GetComponent<NodeData>();
+
+            if (DictLatNode.ContainsKey(data.Latitude))
+            {
+                DictLatNode[data.Latitude].Add(data.gameObject);
+            }
+            else
+            {
+                DictLatNode.Add(data.Latitude, new List<GameObject> { data.gameObject });
+            }
+        }
+        foreach (var kvp in DictLatNode)
+        {
+            for (int i = 0; i < kvp.Value.Count; i++)
+            {
+                kvp.Value[i].transform.Translate(0f, verticcalOffsetForNodeStacks * i, 0f);
+            }
+        }
     }
 
     void CreateNodes()
@@ -163,6 +240,8 @@ public class Visualizer : MonoBehaviour
             data.EntityType = node.EntityType;
             data.Position = node.Position;
             data.Activities = node.MonthlyActions;
+            data.Latitude = node.Latitude;
+            data.Longitude = node.Longitude;
 
             mark.transform.parent = nodeParent.transform;
 

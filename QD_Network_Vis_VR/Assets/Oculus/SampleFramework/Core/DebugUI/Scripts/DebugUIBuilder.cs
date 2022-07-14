@@ -127,7 +127,7 @@ public class DebugUIBuilder : MonoBehaviour
     GetComponent<OVRRaycaster>().pointer = lp.gameObject;
     lp.gameObject.SetActive(false);
 #if UNITY_EDITOR
-    string scene = SceneManager.GetActiveScene().name;
+    string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
     OVRPlugin.SendEvent("debug_ui_builder",
       ((scene == "DebugUI") ||
        (scene == "DistanceGrab") ||
